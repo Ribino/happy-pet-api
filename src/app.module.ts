@@ -5,12 +5,10 @@ import { ProfessionalModule } from './professional/professional.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { ServiceModule } from './service/service.module';
 import { PetModule } from './pet/pet.module';
-import { PrismaClient } from '@prisma/client';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthService } from './auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
-import { RemovePasswordFieldMiddleware } from './middlewares/removePasswordFieldmiddleware';
 import { PrismaModule } from './prisma.module';
 
 @Module({
@@ -30,7 +28,6 @@ import { PrismaModule } from './prisma.module';
     }),
   ],
   providers: [
-    PrismaClient,
     AuthService,
     {
       provide: 'APP_GUARD',
@@ -38,8 +35,5 @@ import { PrismaModule } from './prisma.module';
     },
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RemovePasswordFieldMiddleware).forRoutes('*');
-  }
+export class AppModule {
 }
