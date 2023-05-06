@@ -2,7 +2,6 @@ import { Body, Controller, Get, Head, HttpCode, HttpStatus, Param, Post, Query, 
 import { AuthService } from './auth.service';
 import { Public } from 'src/common/decorators';
 import { Response } from 'express';
-import { isNumber } from 'lodash';
 
 @Controller('auth')
 export class AuthController {
@@ -12,19 +11,13 @@ export class AuthController {
   @Public()
   @Post('signin')
   signIn(@Body() signInDto: Record<string, string>) {
-    console.log('sign')
     return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
   @Public()
   @Head('user')
-  async existsUser(@Query() param: {id?: string, email?: string, cpf?: string}, @Res() res: Response) {
-    const exists = await this.authService.existsUser({
-       id : isNumber(param.id) ? Number(param.id) : undefined,
-       email: param.email,
-       cpf: param.cpf
-    });
-
+  async existsUser(@Query() params: {id?: string, email?: string, cpf?: string}, @Res() res: Response) {
+    const exists = await this.authService.existsUser(params);
     res.status(exists ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     res.end();
   }

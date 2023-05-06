@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNumber } from 'lodash';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -34,7 +34,11 @@ export class AuthService {
     };
   }
 
-  async existsUser(params: Prisma.UserWhereUniqueInput): Promise<boolean> {
-    return await this.usersService.existsUser(params);
+  async existsUser(params: {id?: string, email?: string, cpf?: string}): Promise<boolean> {
+    return await this.usersService.existsUser({
+      id : isNumber(params.id) ? Number(params.id) : undefined,
+      email: params.email,
+      cpf: params.cpf
+    });
   }
 }
