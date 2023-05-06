@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -25,12 +22,12 @@ model User {
 }
 
 model Client {
-  id           Int          @id @default(autoincrement())
-  user         User         @relation(fields: [userId], references: [id])
-  userId       Int          @unique
-  cep          String?
-  address      String?
-  district     String?
+  id       Int     @id @default(autoincrement())
+  userId   Int     @unique
+  cep      String?
+  address  String?
+  district String?
+  user     User    @relation(fields: [userId], references: [id])
 }
 
 model Pet {
@@ -48,6 +45,54 @@ model Pet {
   imagePath   String?
   deleted     Boolean            @default(false)
   scheduling  Scheduling[]
+}
+
+model Service {
+  id           Int             @id @default(autoincrement())
+  name         String          @unique
+  price        Float
+  time         Int
+  serviceType  ServiceTypeEnum
+  Scheduling   Scheduling[]
+  professional Professional[]  @relation("ProfessionalToService")
+}
+
+model Professional {
+  id              Int           @id @default(autoincrement())
+  userId          Int           @unique
+  availableTimeId Int           @unique
+  availableTime   AvailableTime @relation(fields: [availableTimeId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
+  Scheduling      Scheduling[]
+  service         Service[]     @relation("ProfessionalToService")
+}
+
+model AvailableTime {
+  id             Int           @id @default(autoincrement())
+  sunday         Int[]
+  monday         Int[]
+  tuesday        Int[]
+  wednesday      Int[]
+  thursday       Int[]
+  friday         Int[]
+  saturday       Int[]
+  exceptionsDate DateTime[]
+  professional   Professional?
+}
+
+model Scheduling {
+  id             Int          @id @default(autoincrement())
+  date           DateTime
+  start          Int
+  end            Int
+  confirmed      Boolean      @default(false)
+  performed      Boolean      @default(false)
+  petId          Int
+  professionalId Int
+  serviceId      Int
+  pet            Pet          @relation(fields: [petId], references: [id])
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  service        Service      @relation(fields: [serviceId], references: [id])
 }
 
 enum PetSexEnum {
@@ -73,56 +118,8 @@ enum PetTemperamentEnum {
   HYPERACTIVE
 }
 
-model Service {
-  id           Int             @id @default(autoincrement())
-  name         String          @unique
-  price        Float
-  time         Int
-  serviceType  ServiceTypeEnum
-  professional Professional[]
-  Scheduling   Scheduling[]
-}
-
 enum ServiceTypeEnum {
   PETSHOP
   PETWALKER
   PETSITTER
-}
-
-model Professional {
-  id              Int           @id @default(autoincrement())
-  user            User          @relation(fields: [userId], references: [id])
-  userId          Int           @unique
-  service         Service[]
-  Scheduling      Scheduling[]
-  availableTime   AvailableTime @relation(fields: [availableTimeId], references: [id])
-  availableTimeId Int           @unique
-}
-
-model AvailableTime {
-  id             Int           @id @default(autoincrement())
-  professional   Professional?
-  sunday         Int[]
-  monday         Int[]
-  tuesday        Int[]
-  wednesday      Int[]
-  thursday       Int[]
-  friday         Int[]
-  saturday       Int[]
-  exceptionsDate DateTime[]
-}
-
-model Scheduling {
-  id             Int          @id @default(autoincrement())
-  date           DateTime
-  start          Int
-  end            Int
-  confirmed      Boolean      @default(false)
-  performed      Boolean      @default(false)
-  pet            Pet          @relation(fields: [petId], references: [id])
-  petId          Int
-  professional   Professional @relation(fields: [professionalId], references: [id])
-  professionalId Int
-  service        Service      @relation(fields: [serviceId], references: [id])
-  serviceId      Int
 }

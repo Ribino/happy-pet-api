@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { isEmpty } from 'lodash';
 
 @Injectable()
 export class AuthService {
@@ -20,13 +21,19 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
+    const userType = this.usersService.getUserType(user)
     const payload = {
       id: user.id,
       email: user.email,
+      type: userType
     };
 
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
+  }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    return await this.usersService.existsByEmail(email);
   }
 }
