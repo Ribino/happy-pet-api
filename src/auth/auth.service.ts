@@ -3,6 +3,7 @@ import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { isEmpty } from 'lodash';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
     };
   }
 
-  async existsByEmail(email: string): Promise<boolean> {
-    return await this.usersService.existsByEmail(email);
+  async existsUser(params: Prisma.UserWhereUniqueInput): Promise<boolean> {
+    return await this.usersService.existsUser(params);
   }
 }

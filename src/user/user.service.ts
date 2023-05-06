@@ -56,16 +56,14 @@ export class UserService {
     });
   }
 
-  async existsByEmail(emailQuery: string): Promise<boolean>{
+
+  async existsUser(where: Prisma.UserWhereUniqueInput): Promise<boolean> {
     let existsUser: boolean; 
     await this.prisma.user.findFirst({
-      where: {
-        email: emailQuery
-      }
+      where
     }).then(user => {
       existsUser = !isEmpty(user);
     });
-  
     return existsUser;
   }
 
