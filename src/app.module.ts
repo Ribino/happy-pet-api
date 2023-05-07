@@ -10,12 +10,14 @@ import { AuthService } from './auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma.module';
+import { AvailableTimeModule } from './professional/availableTime/availableTime.module';
 
 @Module({
   imports: [
     UserModule,
     ClientModule,
     ProfessionalModule,
+    AvailableTimeModule,
     SchedulingModule,
     ServiceModule,
     PetModule,

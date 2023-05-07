@@ -1,111 +1,76 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Client, Prisma, Professional, User } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { isEmpty } from 'lodash';
-import { error } from 'console';
-import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
-
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
- 
-  constructor(private prisma: PrismaService) {}
+  constructor(private userRepository: UserRepository) {}
 
   async create(createUserDto: CreateUserDto) {
-    const hash = await bcrypt.hash(createUserDto.password, 10);
-
-    return await this.prisma.user.create({
-        data: {
-          name: createUserDto.name,
-          email: createUserDto.email,
-          cpf: createUserDto.cpf,
-          phone: createUserDto.phone,
-          birthdate: new Date(createUserDto.birthdate),
-          imagePath: createUserDto.imagePath,
-          password: hash,
-        },
-        select: {
-          id: true
-        }
-    })
-    .catch(error => {
-      if(error.code === 'P2002') {
+    try {
+      const hash = await bcrypt.hash(createUserDto.password, 10);
+      createUserDto.password = hash;
+      const userCreateInput: Prisma.UserCreateInput = {
+        name: createUserDto.name,
+        email: createUserDto.email,
+        cpf: createUserDto.cpf,
+        phone: createUserDto.phone,
+        birthdate: new Date(createUserDto.birthdate),
+        imagePath: createUserDto.imagePath,
+        password: createUserDto.password,
+      };
+      return await this.userRepository.create(userCreateInput);
+    } catch (error) {
+      if (error.code === 'P2002') {
         throw new BadRequestException({
           message: 'Já existe valor para estes campos cadastrado no sistema',
-          fields: error.meta.target
+          fields: error.meta.target,
         });
       }
 
-      throw new InternalServerErrorException(error);
-    })
-    
+      throw new InternalServerErrorException({
+        message: error.message,
+        statusCode: 500,
+        error: 'Internal Server Error',
+      });
+    }
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async findAll() {
+    return await this.userRepository.findAll();
   }
 
-  findOne(id: number) {
-    return this.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
+  async findOne(id: number) {
+    return await this.userRepository.findOne(id);
   }
-
 
   async existsUser(where: Prisma.UserWhereUniqueInput): Promise<boolean> {
-    let existsUser: boolean; 
-    await this.prisma.user.findFirst({
-      where
-    }).then(user => {
-      existsUser = !isEmpty(user);
-    });
-    return existsUser;
+    return await this.userRepository.existsUser(where);
   }
 
-  findByEmail(email: string) {
-    return this.prisma.user.findUnique({
-      where: {
-        email
-      },
-      include: {
-        client: true,
-        professional: true
-      }
-    });
+  async findByEmail(email: string) {
+    return await this.userRepository.findByEmail(email);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    const updateUserInput: Prisma.UserUpdateInput = {
-      name: '',
-      email: '',
-      cpf: '',
-      phone: '',
-      birthdate: '',
-      imagePath: '',
-    };
-
-    return this.prisma.user.update({
-      data: updateUserInput,
-      where: {
-        id: 0,
-      },
-    });
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    await this.userRepository.update(id, updateUserDto);
   }
 
-  remove(id: number) {
-    return this.prisma.user.delete({
-      where: {
-        id: id,
-      },
-    });
+  async remove(id: number) {
+    await this.userRepository.remove(id);
   }
 
-   getUserType(user: User & { client: Client; professional: Professional; }): string {
+  getUserType(
+    user: User & { client: Client; professional: Professional },
+  ): string {
     if (!isEmpty(user.professional)) {
       return 'PROFESSIONAL';
     }

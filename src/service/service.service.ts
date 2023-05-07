@@ -1,23 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
-import { PrismaService } from 'src/prisma.service';
+import { ServiceRepository } from './service.repository';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ServiceService {
+  constructor(private serviceRepository: ServiceRepository) {}
 
-  constructor(private prisma: PrismaService) {}
+  async create(createServiceDto: CreateServiceDto) {
+    try {
+      const createServiceInput: Prisma.ServiceCreateInput = {
+        name: createServiceDto.name,
+        price: createServiceDto.price,
+        time: createServiceDto.time,
+        serviceType: createServiceDto.serviceType,
+      };
 
-  create(createServiceDto: CreateServiceDto) {
-    return 'This action adds a new service';
+      return await this.serviceRepository.create(createServiceInput);
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new BadRequestException({
+          message: 'Já existe valor para estes campos cadastrado no sistema',
+          fields: error.meta.target,
+        });
+      }
+
+      throw new InternalServerErrorException({
+        message: error.message,
+        statusCode: 500,
+        error: 'Internal Server Error',
+      });
+    }
   }
 
-  findAll() {
-    return `This action returns all service`;
+  async findAll() {
+    return await this.serviceRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} service`;
+  async findOne(id: number) {
+    return await this.serviceRepository.findOne(id);
   }
 
   update(id: number, updateServiceDto: UpdateServiceDto) {
