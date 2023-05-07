@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ProfessionalService } from './professional.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
+import { CreateAvailableTimeDto } from './dto/create-availableTime.dto';
 
 @Controller('professional')
 export class ProfessionalController {
@@ -13,13 +14,13 @@ export class ProfessionalController {
   }
 
   @Get()
-  findAll() {
-    return this.professionalService.findAll();
+  async findAll() {
+    return await this.professionalService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.professionalService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.professionalService.findOne(+id);
   }
 
   @Patch(':id')
