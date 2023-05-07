@@ -1,23 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
-import { PrismaService } from 'src/prisma.service';
+import { Prisma } from '@prisma/client';
+import { PetRepository } from './pet.repository';
 
 @Injectable()
 export class PetService {
+  constructor(private petRepository: PetRepository) {}
 
-  constructor(private prisma: PrismaService) {}
+  async create(createPetDto: CreatePetDto) {
+    try {
+      const createPetInput: Prisma.PetCreateInput = {
+        name: createPetDto.name,
+        color: createPetDto.color,
+        fur: createPetDto.fur,
+        neutered: createPetDto.neutered,
+        race: createPetDto.race,
+        sex: createPetDto.sex,
+        temperament: createPetDto.temperament,
+        type: createPetDto.type,
+        birthdate: new Date(createPetDto.birthdate),
+        weight: createPetDto.weight,
+        imagePath: createPetDto.imagePath,
+      };
 
-  create(createPetDto: CreatePetDto) {
-    return 'This action adds a new pet';
+      return await this.petRepository.create(createPetInput);
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new BadRequestException({
+          message: 'Já existe valor para estes campos cadastrado no sistema',
+          fields: error.meta.target,
+        });
+      }
+
+      throw new InternalServerErrorException({
+        message: error.message,
+        statusCode: 500, 
+        error: 'Internal Server Error', 
+      });
+    }
   }
 
-  findAll() {
-    return `This action returns all pet`;
+  async findAll() {
+    return await this.petRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pet`;
+  async findOne(id: number) {
+    return await this.petRepository.findOne(id);
   }
 
   update(id: number, updatePetDto: UpdatePetDto) {

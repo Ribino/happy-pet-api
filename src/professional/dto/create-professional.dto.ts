@@ -1,1 +1,3 @@
-export class CreateProfessionalDto {}
+export class CreateProfessionalDto {
+    userId: number;
+}
