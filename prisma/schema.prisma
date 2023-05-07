@@ -58,16 +58,16 @@ model Service {
 }
 
 model Professional {
-  id              Int           @id @default(autoincrement())
-  userId          Int           @unique
-  availableTime   AvailableTime? 
-  user            User          @relation(fields: [userId], references: [id])
-  Scheduling      Scheduling[]
-  service         Service[]     @relation("ProfessionalToService")
+  id            Int            @id @default(autoincrement())
+  userId        Int            @unique
+  availableTime AvailableTime?
+  user          User           @relation(fields: [userId], references: [id])
+  Scheduling    Scheduling[]
+  service       Service[]      @relation("ProfessionalToService")
 }
 
 model AvailableTime {
-  id             Int           @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   sunday         Int[]
   monday         Int[]
   tuesday        Int[]
@@ -76,7 +76,7 @@ model AvailableTime {
   friday         Int[]
   saturday       Int[]
   exceptionsDate DateTime[]
-  professionalId Int           @unique
+  professionalId Int          @unique
   professional   Professional @relation(fields: [professionalId], references: [id])
 }
 
