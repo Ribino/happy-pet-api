@@ -2,12 +2,15 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ClientService } from './client.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { Public } from 'src/common/decorators';
 
 @Controller('client')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
+  
   @Post()
+  @Public()
   create(@Body() createClientDto: CreateClientDto) {
     return this.clientService.create(createClientDto);
   }
@@ -19,7 +22,7 @@ export class ClientController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.clientService.findOne(+id);
+    return this.clientService.findOne({id: Number(id)});
   }
 
   @Patch(':id')

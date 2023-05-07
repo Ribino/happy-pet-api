@@ -1,28 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Prisma } from '@prisma/client';
+import { Client, Prisma, Professional, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { isEmpty } from 'lodash';
+import { error } from 'console';
+import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
+
 
 @Injectable()
 export class UserService {
+ 
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
     const hash = await bcrypt.hash(createUserDto.password, 10);
 
-    return this.prisma.user.create({
-      data: {
-        name: createUserDto.name,
-        email: createUserDto.email,
-        cpf: createUserDto.cpf,
-        phone: createUserDto.phone,
-        birthdate: new Date(createUserDto.birthdate),
-        imagePath: createUserDto.imagePath,
-        password: hash,
-      },
-    });
+    return await this.prisma.user.create({
+        data: {
+          name: createUserDto.name,
+          email: createUserDto.email,
+          cpf: createUserDto.cpf,
+          phone: createUserDto.phone,
+          birthdate: new Date(createUserDto.birthdate),
+          imagePath: createUserDto.imagePath,
+          password: hash,
+        },
+        select: {
+          id: true
+        }
+    })
+    .catch(error => {
+      if(error.code === 'P2002') {
+        throw new BadRequestException({
+          message: 'Já existe valor para estes campos cadastrado no sistema',
+          fields: error.meta.target
+        });
+      }
+
+      throw new InternalServerErrorException(error);
+    })
+    
   }
 
   findAll() {
@@ -37,12 +56,26 @@ export class UserService {
     });
   }
 
+
+  async existsUser(where: Prisma.UserWhereUniqueInput): Promise<boolean> {
+    let existsUser: boolean; 
+    await this.prisma.user.findFirst({
+      where
+    }).then(user => {
+      existsUser = !isEmpty(user);
+    });
+    return existsUser;
+  }
+
   findByEmail(email: string) {
-    console.log(email);
     return this.prisma.user.findUnique({
       where: {
         email
       },
+      include: {
+        client: true,
+        professional: true
+      }
     });
   }
 
@@ -70,5 +103,15 @@ export class UserService {
         id: id,
       },
     });
+  }
+
+   getUserType(user: User & { client: Client; professional: Professional; }): string {
+    if (!isEmpty(user.professional)) {
+      return 'PROFESSIONAL';
+    }
+    if (!isEmpty(user.client)) {
+      return 'CLIENT';
+    }
+    return 'ADMIN';
   }
 }
