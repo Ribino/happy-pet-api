@@ -6,18 +6,123 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  email String @unique
-  name String? 
-  cpf String @unique
-  password String
-  phone String? 
-  birthdate DateTime
-  imagePath String?
-  deleted Boolean @default(false)
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  name         String?
+  cpf          String        @unique
+  password     String
+  phone        String?
+  birthdate    DateTime
+  imagePath    String?
+  deleted      Boolean       @default(false)
+  client       Client?
+  professional Professional?
+}
+
+model Client {
+  id           Int          @id @default(autoincrement())
+  user         User         @relation(fields: [userId], references: [id])
+  userId       Int          @unique
+  cep          String?
+  address      String?
+  district     String?
+}
+
+model Pet {
+  id          Int                @id @default(autoincrement())
+  name        String
+  color       String
+  race        String
+  sex         PetSexEnum
+  birthdate   DateTime
+  weight      Float
+  type        PetTypeEnum
+  fur         PetFurEnum
+  temperament PetTemperamentEnum
+  neutered    Boolean
+  imagePath   String?
+  deleted     Boolean            @default(false)
+  scheduling  Scheduling[]
+}
+
+enum PetSexEnum {
+  MALE
+  FEMALE
+}
+
+enum PetFurEnum {
+  SHORT
+  MEDIA
+  LONG
+}
+
+enum PetTypeEnum {
+  CAT
+  DOG
+}
+
+enum PetTemperamentEnum {
+  QUIET
+  FEARFUL
+  SKITTISH
+  HYPERACTIVE
+}
+
+model Service {
+  id           Int             @id @default(autoincrement())
+  name         String          @unique
+  price        Float
+  time         Int
+  serviceType  ServiceTypeEnum
+  professional Professional[]
+  Scheduling   Scheduling[]
+}
+
+enum ServiceTypeEnum {
+  PETSHOP
+  PETWALKER
+  PETSITTER
+}
+
+model Professional {
+  id              Int           @id @default(autoincrement())
+  user            User          @relation(fields: [userId], references: [id])
+  userId          Int           @unique
+  service         Service[]
+  Scheduling      Scheduling[]
+  availableTime   AvailableTime @relation(fields: [availableTimeId], references: [id])
+  availableTimeId Int           @unique
+}
+
+model AvailableTime {
+  id             Int           @id @default(autoincrement())
+  professional   Professional?
+  sunday         Int[]
+  monday         Int[]
+  tuesday        Int[]
+  wednesday      Int[]
+  thursday       Int[]
+  friday         Int[]
+  saturday       Int[]
+  exceptionsDate DateTime[]
+}
+
+model Scheduling {
+  id             Int          @id @default(autoincrement())
+  date           DateTime
+  start          Int
+  end            Int
+  confirmed      Boolean      @default(false)
+  performed      Boolean      @default(false)
+  pet            Pet          @relation(fields: [petId], references: [id])
+  petId          Int
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  professionalId Int
+  service        Service      @relation(fields: [serviceId], references: [id])
+  serviceId      Int
 }
