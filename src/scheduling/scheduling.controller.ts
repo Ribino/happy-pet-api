@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { SchedulingService } from './scheduling.service';
 import { CreateSchedulingDto } from './dto/create-scheduling.dto';
 import { UpdateSchedulingDto } from './dto/update-scheduling.dto';
@@ -8,8 +16,8 @@ export class SchedulingController {
   constructor(private readonly schedulingService: SchedulingService) {}
 
   @Post()
-  create(@Body() createSchedulingDto: CreateSchedulingDto) {
-    return this.schedulingService.create(createSchedulingDto);
+  async create(@Body() createSchedulingDto: CreateSchedulingDto) {
+    return await this.schedulingService.create(createSchedulingDto);
   }
 
   @Get()
@@ -23,7 +31,10 @@ export class SchedulingController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSchedulingDto: UpdateSchedulingDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateSchedulingDto: UpdateSchedulingDto,
+  ) {
     return this.schedulingService.update(+id, updateSchedulingDto);
   }
 

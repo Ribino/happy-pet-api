@@ -82,14 +82,14 @@ model AvailableTime {
 
 model Scheduling {
   id             Int          @id @default(autoincrement())
+  petId          Int
+  professionalId Int
+  serviceId      Int
   date           DateTime
   start          Int
   end            Int
   confirmed      Boolean      @default(false)
   performed      Boolean      @default(false)
-  petId          Int
-  professionalId Int
-  serviceId      Int
   pet            Pet          @relation(fields: [petId], references: [id])
   professional   Professional @relation(fields: [professionalId], references: [id])
   service        Service      @relation(fields: [serviceId], references: [id])

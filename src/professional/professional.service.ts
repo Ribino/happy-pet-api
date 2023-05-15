@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { ProfessionalRepository } from './professional.repository';
@@ -50,5 +54,4 @@ export class ProfessionalService {
   remove(id: number) {
     return `This action removes a #${id} professional`;
   }
-
 }
