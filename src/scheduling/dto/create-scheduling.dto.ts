@@ -1,10 +1,7 @@
 export class CreateSchedulingDto {
-    id: number;
     date: Date;
-    start: Number;
-    end: Number;
-    confirmed: boolean;
-    performed: boolean;
+    start: number;
+    end: number;
     petId: number;
     professionalId: number;
     serviceId: number;
