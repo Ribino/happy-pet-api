@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
 import { PrismaService } from 'src/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, Client } from '@prisma/client';
 
 @Injectable()
 export class PetRepository {
@@ -23,10 +23,18 @@ export class PetRepository {
 
   async findOne(id: number) {
     return await this.prisma.pet.findUnique({
-        where: {
-          id: id,
-        },
-      });
+      where: {
+        id: id,
+      },
+    });
+  }
+
+  async findByClientId(clientId: number) {
+    return await this.prisma.pet.findMany({
+      where: {
+        clientId: clientId,
+      },
+    });
   }
 
   update(id: number, updatePetDto: UpdatePetDto) {
