@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, Client } from '@prisma/client';
 import { PetRepository } from './pet.repository';
 
 @Injectable()
@@ -26,6 +26,11 @@ export class PetService {
         birthdate: new Date(createPetDto.birthdate),
         weight: createPetDto.weight,
         imagePath: createPetDto.imagePath,
+        Client: {
+          connect: {
+            id: createPetDto.clientId,
+          },
+        },
       };
 
       return await this.petRepository.create(createPetInput);
@@ -39,8 +44,8 @@ export class PetService {
 
       throw new InternalServerErrorException({
         message: error.message,
-        statusCode: 500, 
-        error: 'Internal Server Error', 
+        statusCode: 500,
+        error: 'Internal Server Error',
       });
     }
   }
@@ -51,6 +56,10 @@ export class PetService {
 
   async findOne(id: number) {
     return await this.petRepository.findOne(id);
+  }
+
+  async findByClientId(clientId: number) {
+    return await this.petRepository.findByClientId(clientId);
   }
 
   update(id: number, updatePetDto: UpdatePetDto) {

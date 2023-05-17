@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { PetService } from './pet.service';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
@@ -15,6 +23,11 @@ export class PetController {
   @Get()
   findAll() {
     return this.petService.findAll();
+  }
+
+  @Get('client/:clientId')
+  findByClientId(@Param('clientId') clientId: string) {
+    return this.petService.findByClientId(+clientId);
   }
 
   @Get(':id')
