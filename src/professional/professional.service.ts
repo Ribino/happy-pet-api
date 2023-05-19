@@ -6,8 +6,9 @@ import {
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { ProfessionalRepository } from './professional.repository';
-import { CreateAvailableTimeDto } from './dto/create-availableTime.dto';
 import { Prisma } from '@prisma/client';
+import { GetDayOfWeekAndTime } from '../common/helper';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class ProfessionalService {
@@ -15,6 +16,7 @@ export class ProfessionalService {
 
   async create(createProfessionalDto: CreateProfessionalDto) {
     try {
+      const serviceIds = createProfessionalDto.serviceIds || [];
       const professionalCreateInput: Prisma.ProfessionalCreateInput = {
         user: {
           connect: {
@@ -22,6 +24,11 @@ export class ProfessionalService {
           },
         },
       };
+      if (serviceIds.length > 0) {
+        professionalCreateInput.service = {
+          connect: serviceIds.map((serviceId) => ({ id: serviceId })),
+        };
+      }
       return await this.professionalRepository.create(professionalCreateInput);
     } catch (error) {
       if (error.code === 'P2002') {
@@ -45,6 +52,70 @@ export class ProfessionalService {
 
   async findOne(id: number) {
     return await this.professionalRepository.findOne(id);
+  }
+
+  async findByDateAndService(serviceId: number, date: string) {
+    const dateTime = new Date(`${date}T00:00:00`);
+
+    const { dayOfWeek } = GetDayOfWeekAndTime(dateTime);
+
+    const professionals =
+      await this.professionalRepository.findByDateAndService(serviceId);
+
+    const currentDate = DateTime.local()
+      .setZone('America/Sao_Paulo')
+      .toJSDate();
+
+    const currentDayOfWeek = currentDate
+      .toLocaleString('en-US', {
+        weekday: 'long',
+      })
+      .toLowerCase();
+
+    const currentHour = currentDate.getHours();
+
+    const filteredProfessionals = professionals.map((professional) => {
+      const { availableTime, ...rest } = professional;
+      const availableTimeForDay = availableTime[dayOfWeek] || [];
+
+      let filteredAvailableTimeForDay = availableTimeForDay;
+
+      const scheduledTimesForDay = professional.Scheduling.filter(
+        (scheduling) => {
+          const schedulingDate = new Date(scheduling.date);
+          return (
+            schedulingDate.getUTCDate() === dateTime.getUTCDate() &&
+            scheduling.start >= dateTime.getHours()
+          );
+        },
+      ).map((scheduling) => scheduling.start);
+
+      if (
+        dayOfWeek === currentDayOfWeek &&
+        dateTime.getDate() === currentDate.getDate()
+      ) {
+        filteredAvailableTimeForDay = availableTimeForDay.filter(
+          (time: number) =>
+            time > currentHour && !scheduledTimesForDay.includes(time),
+        );
+      } else if (dateTime > currentDate) {
+        filteredAvailableTimeForDay = availableTimeForDay.filter(
+          (time: number) => !scheduledTimesForDay.includes(time),
+        );
+      } else {
+        filteredAvailableTimeForDay = [];
+      }
+
+      delete rest.Scheduling;
+      delete rest.user.password;
+
+      return {
+        ...rest,
+        hours: filteredAvailableTimeForDay,
+      };
+    });
+
+    return filteredProfessionals;
   }
 
   update(id: number, updateProfessionalDto: UpdateProfessionalDto) {
