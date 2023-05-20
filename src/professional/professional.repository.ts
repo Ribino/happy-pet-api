@@ -17,7 +17,12 @@ export class ProfessionalRepository {
   }
 
   async findAll() {
-    return await this.prisma.professional.findMany();
+    return await this.prisma.professional.findMany({
+      include: {
+        user: true,
+        service: true,
+      },
+    });
   }
 
   async findOne(id: number) {
@@ -29,8 +34,27 @@ export class ProfessionalRepository {
         availableTime: true,
         Scheduling: true,
         service: true,
-      }
+      },
     });
+  }
+
+  async findByDateAndService(serviceId: number) {
+    const professionals = await this.prisma.professional.findMany({
+      where: {
+        service: {
+          some: {
+            id: serviceId,
+          },
+        },
+      },
+      include: {
+        user: true,
+        availableTime: true,
+        Scheduling: true,
+      },
+    });
+
+    return professionals;
   }
 
   update(id: number, updateProfessionalDto: UpdateProfessionalDto) {
@@ -40,5 +64,15 @@ export class ProfessionalRepository {
   remove(id: number) {
     return `This action removes a #${id} professional`;
   }
-
 }
+
+// ,
+//         Scheduling: {
+//           none: {
+//             date: {
+//               getDay: dayOfWeek,
+//             },
+//             start: hour,
+//             end: hour,
+//           },
+//         },

@@ -1,8 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { ProfessionalService } from './professional.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
-import { CreateAvailableTimeDto } from './dto/create-availableTime.dto';
 
 @Controller('professional')
 export class ProfessionalController {
@@ -18,13 +26,27 @@ export class ProfessionalController {
     return await this.professionalService.findAll();
   }
 
+  @Get('available')
+  async findByDateAndService(
+    @Query('serviceId') serviceId: string,
+    @Query('date') date: string,
+  ) {
+    return await this.professionalService.findByDateAndService(
+      +serviceId,
+      date,
+    );
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.professionalService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProfessionalDto: UpdateProfessionalDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateProfessionalDto: UpdateProfessionalDto,
+  ) {
     return this.professionalService.update(+id, updateProfessionalDto);
   }
 
