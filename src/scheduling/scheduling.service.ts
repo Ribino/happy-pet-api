@@ -1,9 +1,14 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateSchedulingDto } from './dto/create-scheduling.dto';
 import { UpdateSchedulingDto } from './dto/update-scheduling.dto';
 import { PrismaService } from 'src/prisma.service';
 import { Prisma } from '@prisma/client';
 import { SchedulingRepository } from './scheduling.repository';
+import { ListSchedulingDto } from './dto/list-scheduling.dto';
 
 @Injectable()
 export class SchedulingService {
@@ -43,8 +48,8 @@ export class SchedulingService {
 
       throw new InternalServerErrorException({
         message: error.message,
-        statusCode: 500, 
-        error: 'Internal Server Error', 
+        statusCode: 500,
+        error: 'Internal Server Error',
       });
     }
   }
@@ -55,6 +60,20 @@ export class SchedulingService {
 
   async findOne(id: number) {
     return await this.schedulingRepository.findOne(id);
+  }
+
+  async findAllByClientId(clientId: number) {
+    const data = await this.schedulingRepository.findAllByClientId(clientId);
+    return data.map((scheduling) => {
+      return {
+        id: scheduling.id,
+        date: scheduling.date,
+        petImage: scheduling.pet.imagePath,
+        petName: scheduling.pet.name,
+        serviceName: scheduling.service.name,
+        professionalName: scheduling.professional.user.name,
+      } as ListSchedulingDto;
+    });
   }
 
   update(id: number, updateSchedulingDto: UpdateSchedulingDto) {
