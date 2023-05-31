@@ -32,7 +32,9 @@ export class PetRepository {
   async findByClientId(clientId: number) {
     return await this.prisma.pet.findMany({
       where: {
-        clientId: clientId,
+        Client: {
+          userId: clientId,
+        },
       },
     });
   }
