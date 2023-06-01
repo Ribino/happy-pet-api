@@ -29,6 +29,45 @@ export class SchedulingRepository {
     });
   }
 
+  async findAllByClientId(clientId: number) {
+    return await this.prisma.scheduling.findMany({
+      where: {
+        pet: {
+          Client: {
+            userId: clientId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        date: true,
+        start: true,
+        pet: {
+          select: {
+            id: true,
+            imagePath: true,
+            name: true,
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        professional: {
+          select: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   update(id: number, updateSchedulingDto: UpdateSchedulingDto) {
     return `This action updates a #${id} scheduling`;
   }

@@ -55,7 +55,7 @@ export class ProfessionalService {
   }
 
   async findByDateAndService(serviceId: number, date: string) {
-    const dateTime = new Date(`${date}T00:00:00`);
+    const dateTime = new Date(`${date}`);
 
     const { dayOfWeek } = GetDayOfWeekAndTime(dateTime);
 

@@ -2,9 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { isEmpty, isNumber } from 'lodash';
-import { Prisma } from '@prisma/client';
-
+import { isNumber } from 'lodash';
 @Injectable()
 export class AuthService {
   constructor(
@@ -22,12 +20,12 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const userType = this.usersService.getUserType(user)
+    const userType = this.usersService.getUserType(user);
     const payload = {
       id: user.id,
       email: user.email,
       name: user.name,
-      type: userType
+      type: userType,
     };
 
     return {
@@ -35,11 +33,15 @@ export class AuthService {
     };
   }
 
-  async existsUser(params: {id?: string, email?: string, cpf?: string}): Promise<boolean> {
+  async existsUser(params: {
+    id?: string;
+    email?: string;
+    cpf?: string;
+  }): Promise<boolean> {
     return await this.usersService.existsUser({
-      id : isNumber(params.id) ? Number(params.id) : undefined,
+      id: isNumber(params.id) ? Number(params.id) : undefined,
       email: params.email,
-      cpf: params.cpf
+      cpf: params.cpf,
     });
   }
 }

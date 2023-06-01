@@ -30,6 +30,11 @@ export class SchedulingController {
     return this.schedulingService.findOne(+id);
   }
 
+  @Get('client/:clientId')
+  findAllByClientId(@Param('clientId') clientId: string) {
+    return this.schedulingService.findAllByClientId(+clientId);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,
