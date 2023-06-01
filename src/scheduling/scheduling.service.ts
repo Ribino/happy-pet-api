@@ -72,6 +72,7 @@ export class SchedulingService {
         petName: scheduling.pet.name,
         serviceName: scheduling.service.name,
         professionalName: scheduling.professional.user.name,
+        time: scheduling.start
       } as ListSchedulingDto;
     });
   }

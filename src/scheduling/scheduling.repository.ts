@@ -34,13 +34,14 @@ export class SchedulingRepository {
       where: {
         pet: {
           Client: {
-            id: clientId,
+            userId: clientId,
           },
         },
       },
       select: {
         id: true,
         date: true,
+        start: true,
         pet: {
           select: {
             id: true,

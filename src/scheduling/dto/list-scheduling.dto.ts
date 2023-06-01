@@ -5,4 +5,5 @@ export class ListSchedulingDto {
     serviceName: string;
     professionalName: string;
     date: Date;
+    time: number;
 }
