@@ -7,8 +7,10 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ClientService {
-
-  constructor(private prisma: PrismaService, private userService: UserService) {}
+  constructor(
+    private prisma: PrismaService,
+    private userService: UserService,
+  ) {}
 
   async create(createClientDto: CreateClientDto) {
     const createdUser = await this.userService.create({
@@ -18,18 +20,17 @@ export class ClientService {
       cpf: createClientDto.cpf,
       birthdate: createClientDto.birthdate,
       phone: createClientDto.phone,
-      imagePath: createClientDto.imagePath
-    })
+      imagePath: createClientDto.imagePath,
+    });
 
     return this.prisma.client.create({
-        data: {
-          userId: createdUser.id,
-          cep: createClientDto.cep,
-          address: createClientDto.address,
-          district: createClientDto.district,
-        }
-      }
-    )
+      data: {
+        userId: createdUser.id,
+        cep: createClientDto.cep,
+        address: createClientDto.address,
+        district: createClientDto.district,
+      },
+    });
   }
 
   async findAll() {
@@ -38,7 +39,7 @@ export class ClientService {
 
   async findOne(clientWhereUniqueInput: Prisma.ClientWhereUniqueInput) {
     return await this.prisma.client.findUniqueOrThrow({
-      where: clientWhereUniqueInput
+      where: clientWhereUniqueInput,
     });
   }
 
@@ -49,11 +50,11 @@ export class ClientService {
   remove(removeId: number) {
     return this.prisma.client.delete({
       where: {
-        id: removeId
+        id: removeId,
       },
       include: {
-        user: true
-      }
+        user: true,
+      },
     });
   }
 }
